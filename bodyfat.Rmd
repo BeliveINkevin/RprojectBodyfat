@@ -1,0 +1,101 @@
+---
+title: "Bodyfat"
+author: "Kevin"
+date: "August 9, 2018"
+output: html_document
+---
+#Analyzing Bodyfat using regression techniques
+
+###What is this dataset?
+
+##This dataset shows the ID number of the patient and displays bodyfat(dependent variable) with independant factors which include:
+#####1.Density
+#####2.Age
+#####3.Weight
+#####4.Height
+#####5.Adaposity
+#####6.Neck
+#####7.Chest
+#####8.Abdomen
+#####9.Hip
+#####10.Thigh
+#####11.Knee
+#####12.Ankle
+#####13.Bicepts
+#####14.Forearm
+#####15.Wrist
+
+Unfortunately, I forgot where I found this dataset so that's bad luck for anyone who wants the dataset
+
+##What is this data looking like?
+```{r}
+library(readr)
+BodyFat <- read_csv("C:/Documents/My Excel/BodyFat.csv")
+BodyFat$X18<-NULL #This drops the unknown column called "X18"
+View(BodyFat)
+print(str(BodyFat))
+summary(BodyFat)
+```
+
+##Listing the unique ages for this dataset
+```{r}
+length(unique(BodyFat$AGE))
+unique(BodyFat$AGE)
+```
+
+#Plotting age vs bodyfat
+Looking at the graphs, there is some upward correlation between age and bodyfat, but the data is mostly scattered all over the place. There is some correlation but not so much since various people of various ages can have different bodyfat levels depending on their diet and health
+```{r}
+library(ggplot2)
+ggplot(BodyFat,aes(AGE,BODYFAT))+geom_point(aes(x=AGE,y=BODYFAT,color=BODYFAT,size=AGE))
+ggplot(BodyFat,aes(AGE,BODYFAT))+geom_jitter() #There is some correlation b/t age and bodyfat
+```
+
+#Plotting age vs weight
+No correlation whatsoever. This can tell me that age has nothing do do with weight. 
+```{r}
+ggplot(BodyFat,aes(AGE,WEIGHT))+geom_jitter(aes(X=AGE,y=WEIGHT,color=WEIGHT,size=AGE))
+ggplot(BodyFat,aes(AGE,WEIGHT))+geom_jitter() #No correlation b/t age and weight
+ggplot(BodyFat) + geom_density(aes(WEIGHT))
+```
+
+From the density graph shown above, most of the people weigh around 150lbs
+
+#Plotting weight vs height
+There is a strong correlation between height and weight as shown by these 2 graphs
+```{r}
+ggplot(BodyFat,aes(WEIGHT,HEIGHT))+geom_jitter(aes(X=WEIGHT,y=HEIGHT,color=WEIGHT,size=HEIGHT))
+ggplot(BodyFat,aes(WEIGHT,HEIGHT))+geom_jitter() 
+```
+
+#Which patients have the highest and lowest bodyfat. Top5/bottom5
+```{r}
+BodyFat[order(BodyFat$BODYFAT,decreasing=T)[1:5],] #What can I say about this?
+BodyFat[order(BodyFat$BODYFAT,decreasing=F)[1:5],] #What can I say about this?
+```
+
+#Calculationg the Regression lines
+```{r}
+BfvsAge<-lm(BODYFAT~AGE,data=BodyFat)
+summary(BfvsAge) #Does the R2 support and conclude the graph above
+
+BfvsWeight<-lm(BODYFAT~WEIGHT,data=BodyFat)
+summary(BfvsWeight)
+
+BfvsHeight<-lm(BODYFAT~HEIGHT,data=BodyFat)
+summary(BfvsHeight) #Explain why the R2 is too low
+```
+
+##Analysis of the Regressions
+So I calculated the 3 regressions shown above where bodyfat(dependant variable) is compared against Age, Weight, and height, all 3 of which are independant variables. For bodyfat vs Age and Height. I found that the $R^2<1 percent$ which tells me that Age and height has nothing do do with bodyfat. This is true due to many factors such as diet and excercise. 
+
+Now for bodyfat vs weight. The $R^2$ was around 37 percent, which was much higher than Age and Height. What this is telling me is that some of the patients are heavy due to being fat, and some are heavy due to having lots of muscle. Therefore this model is a little accurate, but not so much. 
+
+#Calculating Bodyfat vs all independant variables
+```{r}
+BfvsALL<-lm(BODYFAT~DENSITY+AGE+WEIGHT+HEIGHT+ADIPOSITY+NECK+CHEST+ABDOMEN+HIP+THIGH+
+              KNEE+ANKLE+BICEPS+FOREARM+WRIST,data=BodyFat)
+summary(BfvsALL) 
+```
+##Analysis of this regression equation
+From this regression, I got a $R^2$ value of 97.74%. This model is extremely accurate and it appears that bodyfat is dependant on all the other independant variables/measurements. 
